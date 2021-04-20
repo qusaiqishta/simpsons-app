@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<% includes(public/layouts/head.ejs) %>
+<body>
+    <% includes(public/layouts/header.ejs) %>
+    <main>
+        <%simpsons.foreach(simp=>{ %>
+            <section id="template">
+                <p><%=simp.qoute%></p>
+                <p><%=simp.character_name%></p>
+                <p><%=simp.image_url%></p>
+                <p><%=simp.description%></p>
+            </section>
+            <form action="/save-qoute" method="POST">
+                <input type="hidden" name="qoute" value="<%=simp.qoute%>">
+                <input type="hidden" name="character_name" value="<%=simp.character_name%>">
+                <input type="hidden" name="image_url" value="<%=simp.image_url%>">
+                <input type="hidden" name="description" value="<%=simp.description%>">
+                <input type="submit" value="save qoute">
+            </form>
+
+            <%  }) %>
+    </main>
+    
+</body>
+</html>

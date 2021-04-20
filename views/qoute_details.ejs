@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+    <% includes(public/layouts/head.ejs) %>
+<body>
+    
+    <% includes(public/layouts/header.ejs) %>
+    <main>
+        <%quotes.foreach(simp=>{ %>
+            <section id="template">
+                <p><%=simp.qoute%></p>
+                <p><%=simp.character_name%></p>
+                <p><%=simp.image_url%></p>
+                <p><%=simp.description%></p>
+            </section>
+
+            <form action="/qoute/<%=qoute.id%>?_method=PUT" method="POST">
+            <input type="text" name="quote" value="<%=simp.qoute%>">
+            <input type="text" name="character_name" value="<%=simp.character_name%>">
+            <input type="text" name="description" value="<%=simp.description%>">
+            <input type="submit" value="Update Qoute">
+
+            </form>
+
+            <br>
+            <form action="/qoute/<%=qoute.id%>?_method=PUT" method="POST">
+            <input type="submit" value="Delete qoute">
+            </form>
+
+
+            <%  }) %>
+    </main>
+    
+</body>
+</html>
