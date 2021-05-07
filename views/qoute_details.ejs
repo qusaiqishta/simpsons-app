@@ -1,34 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
-    <% includes(public/layouts/head.ejs) %>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+    <title>home</title>
+</head>
+
 <body>
-    
-    <% includes(public/layouts/header.ejs) %>
+
+    <header>
+        <img src="screenshots/nav.png" alt="">
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/favorite-quotes">Favorite Qoutes</a></li>
+
+            </ul>
+        </nav>
+    </header>
     <main>
-        <%quotes.foreach(simp=>{ %>
+        <%quotes.forEach(simp=>{ %>
             <section id="template">
-                <p><%=simp.qoute%></p>
-                <p><%=simp.character_name%></p>
-                <p><%=simp.image_url%></p>
-                <p><%=simp.description%></p>
+                <p>
+                    <%=simp.qoute%>
+                </p>
+                <p>
+                    <%=simp.character%>
+                </p>
+                <img src=<%=simp.image%> >
+                <p>
+                    <%=simp.characterDirection%>
+                </p>
             </section>
 
-            <form action="/qoute/<%=qoute.id%>?_method=PUT" method="POST">
-            <input type="text" name="quote" value="<%=simp.qoute%>">
-            <input type="text" name="character_name" value="<%=simp.character_name%>">
-            <input type="text" name="description" value="<%=simp.description%>">
-            <input type="submit" value="Update Qoute">
+            <form action="/favorite-quotes/<%=simp.id%>?_method=PUT" method="POST">
+                <input type="text" name="quote" value="<%=simp.qoute%>">
+                <input type="submit" value="Update Qoute">
 
             </form>
 
             <br>
-            <form action="/qoute/<%=qoute.id%>?_method=PUT" method="POST">
-            <input type="submit" value="Delete qoute">
+            <form action="/favorite-quotes/<%=simp.id%>?_method=DELETE" method="POST">
+                <input type="submit" value="Delete qoute">
             </form>
 
 
-            <%  }) %>
+            <% }) %>
     </main>
-    
+
 </body>
+
 </html>

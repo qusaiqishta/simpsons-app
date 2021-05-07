@@ -1,9 +1,9 @@
 DROP TABLE IF EXISTS simp;
 
 CREATE TABLE simp(
-    id SERIAL PRIMARY KEY,
+    id SERIAL PRIMARY  NOT NULL,
     quote VARCHAR(200),
-    character_name VARCHAR(200),
-    image_url VARCHAR(200),
-    description VARCHAR(200)
+    character VARCHAR(200),
+    image VARCHAR(200),
+    characterDirection VARCHAR(200)
 )

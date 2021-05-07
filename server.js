@@ -1,115 +1,116 @@
 'use strict'
-// Application Dependencies
-const express = require('express');
-const pg = require('pg');
-const methodOverride = require('method-override');
-const superagent = require('superagent');
-const cors = require('cors');
+//application dependences 
 
-// Environment variables
+const express=require('express');
+const pg=require('pg');
+const superagent=require('superagent');
+const cors=require('cors');
+const methodOverride=require('method-override');
+const { render } = require('ejs');
+
+// Environmental variables
 require('dotenv').config();
-
-// Application Setup
-const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT=process.env.PORT;
 const DATABASE_URL=process.env.DATABASE_URL;
 
+//application setup
+const app=express();
 
-// Express middleware
-app.use(methodOverride('_method'));
+//Express mildware
 app.use(express.urlencoded({extended:true}));
-// Utilize ExpressJS functionality to parse the body of the request
+app.use(methodOverride('_method'));
 
-// Specify a directory for static resources
-app.use(express.static('/public'));
+//specify a directory for static resources 
+app.use(express.static('public'));
 
-// define our method-override reference
-
-// Set the view engine for server-side templating
+//set the view engine for server-side templating 
 app.set('view engine','ejs');
 
-// Use app cors
+//use app cors
 app.use(cors());
 
-// Database Setup
-const client = new pg.Client(process.env.DATABASE_URL);
+//Database setup
+const client=new pg.Client(DATABASE_URL);
+
 
 app.get('/',renderHomePage);
-app.get('/favorite-quotes',allfavoriteSimpsons);
-app.get('/favorite-quotes/:quote_id',viewSimpsonDetails);
-app.post('/save-qoute',saveQoute);
-app.put('/update-qoute',updateQoute);
-app.delete('/delete-qoute',deleteQoute);
+app.get('/favorite-quotes',allFavoriteSimpsons);
+app.get('/favorite-quotes/:quote_id',viewDetails);
+app.post('/save-qoute',saveQuote);
+app.put('/favorite-quotes/:quote_id',updateQuote);
+app.delete('/favorite-quotes/:quote_id',deleteQuote);
+
+
 
 
 
 function Simpson(simpInfo){
     this.quote=simpInfo.quote;
-    this.character_name=simpInfo.character_name;
-    this.image_url=simpInfo.image_url;
-    this.description=simpInfo.description;
+    this.character=simpInfo.character;
+    this.image=simpInfo.image;
+    this.characterDirection=simpInfo.characterDirection;
 }
+
+
 
 
 
 function renderHomePage(req,res){
     const url='https://thesimpsonsquoteapi.glitch.me/quotes?count=10';
     superagent.get(url).set('User-Agent', '1.0').then(results=>{
-        const simpsons=req.body.map(object=>new Simpson(object));
-    });res.render('index',{simpsons:simpsons});
+        const simpsons=results.body.map(object=>{
+            return new Simpson(object);
+        })
+        res.render('index',{simpsons:simpsons});
+    })
 }
 
-function allfavoriteSimpsons(req,res){
-    const sql='SELECT * FROM simp WHERE id=$1;';
-    const safevalue=['api'];
-    client.query(sql,safevalue).then(results=>{
+function allFavoriteSimpsons(req,res){
+    const sql='SELECT * FROM simp;';
+    client.query(sql).then(results=>{
         res.render('favorite_qoutes.ejs',{simpsons:results.rows});
     })
 }
 
-function viewSimpsonDetails(req,res){
-    quoteId=req.params.quote_id;
-    const sql='SELECT * FROM simp WHERE id=$1;';
-    const safevalue=[quoteId];
-    client.query(sql,safevalue).then(results=>{
-        res.render('qoute_details.ejs',{quotes:results.rows});
-    })
-}
-
-
-function saveQoute(req,res){
-    const{qoute,character_name,image_url,description}=req.body;
-    const sql='INSERT INTO simp(qoute,character_name,image_url,description) VALUES($1,$2,$3,$4);';
-    const safevalue=[qoute,character_name,image_url,description,'api'];
-    client.query(sql,safevalue).then(()=>{
+function saveQuote(req,res){
+    const{quote,character,image,characterDirection}=req.body;
+    const sql='INSERT INTO simp(quote,character,image,characterDirection) VALUES($1,$2,$3,$4);';
+    const safeValues=[quote,character,image,characterDirection];
+    client.query(sql,safeValues).then(()=>{
         res.redirect('/favorite-quotes')
     })
 }
 
-function updateQoute(req,res){
-const quoteId=req.params.quote_id;
-const sql='UPDATE simp SET qoute=$1,character_name=$2,image_url=$3,description=$4;';
-const{qoute,character_name,image_url,description}=req.body;
-const safevalue=[qoute,character_name,image_url,description];
-client.query(sql,safevalue).then(()=>{
-    res.redirect(`/quout/${quoteId}`);
-})}
 
-function deleteQoute(req,res){
+function viewDetails(req,res){
+    const quoteId=req.params.quote_id;
+    const sql=' select * from simp WHERE id=$1;';
+    const safeValue=[quoteId];
+    client.query(sql,safeValue).then(results=>{
+        res.render('qoute_details.ejs',{quotes:results.rows});
+    })
+}
+
+function updateQuote(req,res){
+    const quoteId=req.params.quote_id;
+    const sql='UPDATE simp SET quote=$1 WHERE id=$2;';
+    const quote=req.body;
+    const safeValue=[quote,quoteId];
+    client.query(sql,safeValue).then(()=>{
+        res.redirect('/favorite-quotes')
+    })
+}
+
+function deleteQuote(req,res){
     const quoteId=req.params.quote_id;
     const sql='DELETE FROM simp WHERE id=$1;';
-    const safevalue=[quoteId];
-    client.query(sql,safevalue).then(()=>{
-        res.render('/favorite-quotes/:quote_id');
+    const safeValue=[quoteId];
+    client.query(sql,safeValue).then(()=>{
+        res.redirect('/favorite-quotes');
     })
 }
 
 
-
-
-// helper functions
-
-// app start point
-client.connect().then(() =>
-    app.listen(PORT, () => console.log(`Listening on port: ${PORT}`))
-).catch((error)=>console.log(error));
+client.connect().then(()=>{
+    app.listen(PORT,console.log('listening to PORT',PORT))
+}).catch((error)=>console.log(error))
